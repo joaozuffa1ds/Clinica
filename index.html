@@ -1,92 +1,92 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<title>Sistema de Cadastro</title>
+    <meta charset="UTF-8">
+    <title>Sistema de Cadastro</title>
 
-<style>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            text-align: center;
+        }
 
-body{
-font-family: Arial;
-background:#f2f2f2;
-text-align:center;
-}
+        h1 {
+            margin-top: 20px;
+        }
 
-h1{
-margin-top:20px;
-}
+        table {
+            margin: auto;
+            border-collapse: collapse;
+            width: 95%;
+            background: white;
+        }
 
-table{
-margin:auto;
-border-collapse:collapse;
-width:95%;
-background:white;
-}
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
 
-th,td{
-border:1px solid #ccc;
-padding:10px;
-}
+        th {
+            background: #2196f3;
+            color: white;
+        }
 
-th{
-background:#2196f3;
-color:white;
-}
+        button {
+            margin: 10px;
+            padding: 8px 15px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
 
-button{
-margin:10px;
-padding:8px 15px;
-background:#2196f3;
-color:white;
-border:none;
-cursor:pointer;
-}
+        button:hover {
+            background: #1976d2;
+        }
 
-button:hover{
-background:#1976d2;
-}
-
-.excluir{
-background:red;
-}
-
-</style>
+        .excluir {
+            background: red;
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>Cadastro de Pessoas</h1>
+    <h1>Cadastro de Pessoas</h1>
 
-<button onclick="adicionar()">Adicionar Pessoa</button>
-<button onclick="ordenar()">Ordenar por Nome</button>
-<button onclick="salvar()">Salvar</button>
+    <button onclick="adicionar()">Adicionar Pessoa</button>
+    <button onclick="ordenar()">Ordenar por Nome</button>
+    <button onclick="salvar()">Salvar</button>
 
-<table id="tabela">
+    <table id="tabela">
 
-<thead>
-<tr>
-<th>Nome</th>
-<th>Telefone</th>
-<th>CPF</th>
-<th>RG</th>
-<th>Observação</th>
-<th>Ação</th>
-</tr>
-</thead>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>CPF</th>
+                <th>RG</th>
+                <th>Observação</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
 
-<tbody></tbody>
+        <tbody></tbody>
 
-</table>
+    </table>
 
-<script>
+    <script>
 
-let tabela=document.querySelector("#tabela tbody")
+        let tabela = document.querySelector("#tabela tbody")
 
-function adicionar(){
+        function adicionar() {
 
-let linha=document.createElement("tr")
+            let linha = document.createElement("tr")
 
-linha.innerHTML=`
+            linha.innerHTML = `
 <td contenteditable="true"></td>
 <td contenteditable="true"></td>
 <td contenteditable="true"></td>
@@ -95,52 +95,179 @@ linha.innerHTML=`
 <td><button class="excluir" onclick="excluir(this)">Excluir</button></td>
 `
 
-tabela.appendChild(linha)
+            tabela.appendChild(linha)
+
+        }
+
+        function excluir(botao) {
+            botao.parentElement.parentElement.remove()
+        }
+
+        function salvar() {
+
+            let dados = []
+
+            document.querySelectorAll("#tabela tbody tr").forEach(linha => {
+
+                let col = linha.querySelectorAll("td")
+
+                dados.push({
+                    nome: col[0].innerText,
+                    telefone: col[1].innerText,
+                    cpf: col[2].innerText,
+                    rg: col[3].innerText,
+                    obs: col[4].innerText
+                })
+
+            })
+
+            localStorage.setItem("cadastro", JSON.stringify(dados))
+
+            alert("Dados salvos!")
+
+        }
+
+        function carregar() {
+
+            let dados = JSON.parse(localStorage.getItem("cadastro")) || []
+
+            tabela.innerHTML = ""
+
+            dados.forEach(d => {
+
+                let linha = document.createElement("tr")
+
+                linha.innerHTML = `
+<td contenteditable="true">${d.nome}</td>
+<td contenteditable="true">${d.telefone}</td>
+<td contenteditable="true">${d.c >
+</head >
+
+                    <body>
+
+                        <h1>Cadastro de Pessoas</h1>
+
+                        <button onclick="adicionar()">Adicionar Pessoa</button>
+                        <button onclick="ordenar()">Ordenar por Nome</button>
+                        <button onclick="salvar()">Salvar</button>
+
+                        <table id="tabela">
+
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>CPF</th>
+                                    <th>RG</th>
+                                    <th>Observação</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+
+                            <tbody></tbody>
+
+                        </table>
+
+                        <script>
+
+                            let tabela=document.querySelector("#tabela tbody")
+
+                            function adicionar(){
+
+                                let linha=document.createElement("tr")
+
+                            linha.innerHTML=`
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td><button class="excluir" onclick="excluir(this)">Excluir</button></td>
+                            `
+
+                            tabela.appendChild(linha)
 
 }
 
-function excluir(botao){
-botao.parentElement.parentElement.remove()
-}
+                            function excluir(botao){
+                                botao.parentElement.parentElement.remove()
+                            }
 
-function salvar(){
+                            function salvar(){
 
-let dados=[]
+                                let dados=[]
 
 document.querySelectorAll("#tabela tbody tr").forEach(linha=>{
 
-let col=linha.querySelectorAll("td")
+                                let col=linha.querySelectorAll("td")
 
-dados.push({
-nome:col[0].innerText,
-telefone:col[1].innerText,
-cpf:col[2].innerText,
-rg:col[3].innerText,
-obs:col[4].innerText
+                            dados.push({
+                                nome:col[0].innerText,
+                            telefone:col[1].innerText,
+                            cpf:col[2].innerText,
+                            rg:col[3].innerText,
+                            obs:col[4].innerText
 })
 
 })
 
-localStorage.setItem("cadastro",JSON.stringify(dados))
+                            localStorage.setItem("cadastro",JSON.stringify(dados))
 
-alert("Dados salvos!")
+                            alert("Dados salvos!")
 
 }
 
-function carregar(){
+                            function carregar(){
 
-let dados=JSON.parse(localStorage.getItem("cadastro"))||[]
+                                let dados=JSON.parse(localStorage.getItem("cadastro"))||[]
 
-tabela.innerHTML=""
+                            tabela.innerHTML=""
 
 dados.forEach(d=>{
 
-let linha=document.createElement("tr")
+                                let linha=document.createElement("tr")
 
-linha.innerHTML=`
-<td contenteditable="true">${d.nome}</td>
-<td contenteditable="true">${d.telefone}</td>
-<td contenteditable="true">${d.cpf}</td>
+                            linha.innerHTML=`
+                            <td contenteditable="true">${d.nome}</td>
+                            <td contenteditable="true">${d.telefone}</td>
+                            <td contenteditable="true">${d.cpf}</td>
+                            <td contenteditable="true">${d.rg}</td>
+                            <td contenteditable="true">${d.obs}</td>
+                            <td><button class="excluir" onclick="excluir(this)">Excluir</button></td>
+`
+
+tabela.appendChild(linha)
+
+})
+
+}
+
+function ordenar(){
+
+let linhas=Array.from(document.querySelectorAll("#tabela tbody tr"))
+
+linhas.sort((a,b)=>{
+
+let A=a.children[0].innerText.toLowerCase()
+let B=b.children[0].innerText.toLowerCase()
+
+return A.localeCompare(B)
+
+})
+
+tabela.innerHTML=""
+
+linhas.forEach(l=>tabela.appendChild(l))
+
+}
+
+carregar()
+
+    </script>
+
+</body>
+
+</html>pf}</td>
 <td contenteditable="true">${d.rg}</td>
 <td contenteditable="true">${d.obs}</td>
 <td><button class="excluir" onclick="excluir(this)">Excluir</button></td>
@@ -176,4 +303,5 @@ carregar()
 </script>
 
 </body>
+
 </html>
