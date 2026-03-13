@@ -1,0 +1,90 @@
+<script>
+const senha = "14162130";
+const tabela = document.querySelector("#tabela tbody");
+
+function adicionar() {
+  const s = prompt("Digite a senha para adicionar:");
+  if (s===senha){
+    const linha = document.createElement("tr");
+    linha.innerHTML = `
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td>
+        <button onclick="editar(this)">Salvar</button>
+        <button class="excluir" onclick="remover(this)">Excluir</button>
+      </td>
+    `;
+    tabela.appendChild(linha);
+    salvar();
+  } else alert("Senha incorreta!");
+}
+
+function editar(botao) {
+  const linha = botao.parentElement.parentElement;
+  if(botao.textContent==="Editar"){
+    const s = prompt("Digite a senha para editar:");
+    if(s===senha){
+      linha.querySelectorAll("td").forEach((td,i)=>{if(i<5) td.contentEditable="true";});
+      botao.textContent="Salvar";
+    } else alert("Senha incorreta!");
+  } else {
+    linha.querySelectorAll("td").forEach((td,i)=>{if(i<5) td.contentEditable="false";});
+    botao.textContent="Editar";
+    salvar();
+  }
+}
+
+function remover(botao){
+  const s = prompt("Digite a senha para excluir:");
+  if(s===senha){ botao.parentElement.parentElement.remove(); salvar(); }
+  else alert("Senha incorreta!");
+}
+
+function salvar(){
+  const dados = [];
+  tabela.querySelectorAll("tr").forEach(linha=>{
+    const col = linha.querySelectorAll("td");
+    dados.push({
+      nome: col[0].innerText.trim(),
+      telefone: col[1].innerText.trim(),
+      cpf: col[2].innerText.trim(),
+      rg: col[3].innerText.trim(),
+      obs: col[4].innerText.trim()
+    });
+  });
+  localStorage.setItem("cadastro", JSON.stringify(dados));
+}
+
+function carregar(){
+  const dados = JSON.parse(localStorage.getItem("cadastro"))||[];
+  tabela.innerHTML="";
+  dados.forEach(d=>{
+    const linha=document.createElement("tr");
+    linha.innerHTML=`
+      <td contenteditable="false">${d.nome}</td>
+      <td contenteditable="false">${d.telefone}</td>
+      <td contenteditable="false">${d.cpf}</td>
+      <td contenteditable="false">${d.rg}</td>
+      <td contenteditable="false">${d.obs}</td>
+      <td>
+        <button onclick="editar(this)">Editar</button>
+        <button class="excluir" onclick="remover(this)">Excluir</button>
+      </td>
+    `;
+    tabela.appendChild(linha);
+  });
+}
+
+function ordenar(){
+  const linhas=Array.from(tabela.querySelectorAll("tr"));
+  linhas.sort((a,b)=>a.children[0].innerText.toLowerCase().localeCompare(b.children[0].innerText.toLowerCase()));
+  tabela.innerHTML="";
+  linhas.forEach(linha=>tabela.appendChild(linha));
+  salvar();
+}
+
+carregar();
+</script>
