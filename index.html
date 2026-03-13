@@ -65,130 +65,118 @@
 </table>
 
 <script>
-  const senha = "14162130";
-  const tabela = document.querySelector("#tabela tbody");
+const senha = "14162130";
+const tabela = document.querySelector("#tabela tbody");
 
-  // Função para adicionar nova pessoa (com senha)
-  function adicionar() {
-    const senhaInput = prompt("Digite a senha para adicionar uma nova pessoa:");
-    if (senhaInput === senha) {
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td>
-          <button onclick="editar(this)">Salvar</button> 
-          <button class="excluir" onclick="remover(this)">Excluir</button>
-        </td>
-      `;
-      tabela.appendChild(linha);
-      salvar();
-    } else {
-      alert("Senha incorreta. Não foi possível adicionar.");
-    }
+// Adicionar nova pessoa (precisa de senha)
+function adicionar() {
+  const senhaInput = prompt("Digite a senha para adicionar uma nova pessoa:");
+  if (senhaInput === senha) {
+    const linha = document.createElement("tr");
+    linha.innerHTML = `
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+      <td>
+        <button onclick="editar(this)">Salvar</button>
+        <button class="excluir" onclick="remover(this)">Excluir</button>
+      </td>
+    `;
+    tabela.appendChild(linha);
+    salvar();
+  } else {
+    alert("Senha incorreta. Não foi possível adicionar.");
   }
+}
 
-  // Função para editar (habilita edição ou salva)
-  function editar(botao) {
-    const linha = botao.parentElement.parentElement;
-    if (botao.textContent === "Editar") {
-      const senhaInput = prompt("Digite a senha para editar esta pessoa:");
-      if (senhaInput === senha) {
-        linha.querySelectorAll("td").forEach((td, idx) => {
-          if (idx < 5) td.contentEditable = "true";
-        });
-        botao.textContent = "Salvar";
-      } else {
-        alert("Senha incorreta. Não pode editar.");
-      }
-    } else {
-      // Salvar edição
+// Editar linha (habilita edição ou salva)
+function editar(botao) {
+  const linha = botao.parentElement.parentElement;
+  if (botao.textContent === "Editar") {
+    const senhaInput = prompt("Digite a senha para editar esta pessoa:");
+    if (senhaInput === senha) {
       linha.querySelectorAll("td").forEach((td, idx) => {
-        if (idx < 5) td.contentEditable = "false";
+        if (idx < 5) td.contentEditable = "true";
       });
-      botao.textContent = "Editar";
-      salvar();
-    }
-  }
-
-  // Função para excluir linha (com senha)
-  function remover(botao) {
-    const senhaInput = prompt("Digite a senha para excluir esta pessoa:");
-    if (senhaInput === senha) {
-      botao.parentElement.parentElement.remove();
-      salvar();
+      botao.textContent = "Salvar";
     } else {
-      alert("Senha incorreta. Não pode excluir.");
+      alert("Senha incorreta. Não pode editar.");
     }
-  }
-
-  // Salvar todos os dados no LocalStorage
-  function salvar() {
-    const dados = [];
-    tabela.querySelectorAll("tr").forEach(linha => {
-      const colunas = linha.querySelectorAll("td");
-      dados.push({
-        nome: colunas[0].innerText.trim(),
-        telefone: colunas[1].innerText.trim(),
-        cpf: colunas[2].innerText.trim(),
-        rg: colunas[3].innerText.trim(),
-        obs: colunas[4].innerText.trim()
-      });
+  } else {
+    // Salvar edição
+    linha.querySelectorAll("td").forEach((td, idx) => {
+      if (idx < 5) td.contentEditable = "false";
     });
-    try {
-      localStorage.setItem("cadastro", JSON.stringify(dados));
-    } catch (e) {
-      alert("Erro ao salvar os dados. Verifique o armazenamento do navegador.");
-      console.error(e);
-    }
-  }
-
-  // Carregar dados do LocalStorage
-  function carregar() {
-    let dados;
-    try {
-      dados = JSON.parse(localStorage.getItem("cadastro"));
-    } catch (e) {
-      alert("Erro ao carregar os dados salvos.");
-      dados = [];
-    }
-    if (!Array.isArray(dados)) dados = [];
-    tabela.innerHTML = "";
-    dados.forEach(d => {
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td contenteditable="false">${d.nome}</td>
-        <td contenteditable="false">${d.telefone}</td>
-        <td contenteditable="false">${d.cpf}</td>
-        <td contenteditable="false">${d.rg}</td>
-        <td contenteditable="false">${d.obs}</td>
-        <td>
-          <button onclick="editar(this)">Editar</button> 
-          <button class="excluir" onclick="remover(this)">Excluir</button>
-        </td>
-      `;
-      tabela.appendChild(linha);
-    });
-  }
-
-  // Ordenar tabela pelo nome (A-Z)
-  function ordenar() {
-    const linhas = Array.from(tabela.querySelectorAll("tr"));
-    linhas.sort((a, b) => {
-      const nomeA = a.children[0].innerText.toLowerCase();
-      const nomeB = b.children[0].innerText.toLowerCase();
-      return nomeA.localeCompare(nomeB);
-    });
-    tabela.innerHTML = "";
-    linhas.forEach(linha => tabela.appendChild(linha));
+    botao.textContent = "Editar";
     salvar();
   }
+}
 
-  // Ao carregar a página, carregar os dados salvos
-  carregar();
+// Excluir linha (precisa de senha)
+function remover(botao) {
+  const senhaInput = prompt("Digite a senha para excluir esta pessoa:");
+  if (senhaInput === senha) {
+    botao.parentElement.parentElement.remove();
+    salvar();
+  } else {
+    alert("Senha incorreta. Não pode excluir.");
+  }
+}
+
+// Salvar dados no LocalStorage
+function salvar() {
+  const dados = [];
+  tabela.querySelectorAll("tr").forEach(linha => {
+    const colunas = linha.querySelectorAll("td");
+    dados.push({
+      nome: colunas[0].innerText.trim(),
+      telefone: colunas[1].innerText.trim(),
+      cpf: colunas[2].innerText.trim(),
+      rg: colunas[3].innerText.trim(),
+      obs: colunas[4].innerText.trim()
+    });
+  });
+  localStorage.setItem("cadastro", JSON.stringify(dados));
+}
+
+// Carregar dados do LocalStorage
+function carregar() {
+  let dados = JSON.parse(localStorage.getItem("cadastro")) || [];
+  tabela.innerHTML = "";
+  dados.forEach(d => {
+    const linha = document.createElement("tr");
+    linha.innerHTML = `
+      <td contenteditable="false">${d.nome}</td>
+      <td contenteditable="false">${d.telefone}</td>
+      <td contenteditable="false">${d.cpf}</td>
+      <td contenteditable="false">${d.rg}</td>
+      <td contenteditable="false">${d.obs}</td>
+      <td>
+        <button onclick="editar(this)">Editar</button>
+        <button class="excluir" onclick="remover(this)">Excluir</button>
+      </td>
+    `;
+    tabela.appendChild(linha);
+  });
+}
+
+// Ordenar tabela pelo nome (A-Z)
+function ordenar() {
+  const linhas = Array.from(tabela.querySelectorAll("tr"));
+  linhas.sort((a, b) => {
+    const nomeA = a.children[0].innerText.toLowerCase();
+    const nomeB = b.children[0].innerText.toLowerCase();
+    return nomeA.localeCompare(nomeB);
+  });
+  tabela.innerHTML = "";
+  linhas.forEach(linha => tabela.appendChild(linha));
+  salvar();
+}
+
+// Carrega os dados quando a página abre
+carregar();
 </script>
 
 </body>
