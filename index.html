@@ -23,7 +23,13 @@ button:hover { background:#1976d2; }
 <table id="tabela">
 <thead>
 <tr>
-<th>Nome</th><th>Telefone</th><th>CPF</th><th>RG</th><th>Observação</th><th>Ação</th>
+<th>Nome</th>
+<th>Telefone</th>
+<th>CPF</th>
+<th>RG</th>
+<th>Observação</th>
+<th>Tratamento</th>
+<th>Ação</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -38,6 +44,7 @@ function adicionar() {
   if(s===senha){
     const linha = document.createElement("tr");
     linha.innerHTML = `
+      <td contenteditable="true"></td>
       <td contenteditable="true"></td>
       <td contenteditable="true"></td>
       <td contenteditable="true"></td>
@@ -58,11 +65,11 @@ function editar(botao) {
   if(botao.textContent==="Editar"){
     const s = prompt("Digite a senha para editar:");
     if(s===senha){
-      linha.querySelectorAll("td").forEach((td,i)=>{if(i<5) td.contentEditable="true";});
+      linha.querySelectorAll("td").forEach((td,i)=>{if(i<6) td.contentEditable="true";});
       botao.textContent="Salvar";
     } else alert("Senha incorreta!");
   } else {
-    linha.querySelectorAll("td").forEach((td,i)=>{if(i<5) td.contentEditable="false";});
+    linha.querySelectorAll("td").forEach((td,i)=>{if(i<6) td.contentEditable="false";});
     botao.textContent="Editar";
     salvar();
   }
@@ -83,7 +90,8 @@ function salvar(){
       telefone: col[1].innerText.trim(),
       cpf: col[2].innerText.trim(),
       rg: col[3].innerText.trim(),
-      obs: col[4].innerText.trim()
+      obs: col[4].innerText.trim(),
+      tratamento: col[5].innerText.trim()
     });
   });
   localStorage.setItem("cadastro", JSON.stringify(dados));
@@ -100,6 +108,7 @@ function carregar(){
       <td contenteditable="false">${d.cpf}</td>
       <td contenteditable="false">${d.rg}</td>
       <td contenteditable="false">${d.obs}</td>
+      <td contenteditable="false">${d.tratamento}</td>
       <td>
         <button onclick="editar(this)">Editar</button>
         <button class="excluir" onclick="remover(this)">Excluir</button>
@@ -113,7 +122,7 @@ function ordenar(){
   const linhas=Array.from(tabela.querySelectorAll("tr"));
   linhas.sort((a,b)=>a.children[0].innerText.toLowerCase().localeCompare(b.children[0].innerText.toLowerCase()));
   tabela.innerHTML="";
-  linhas.forEach(l=>tabela.appendChild(l));
+  linhas.forEach(linha=>tabela.appendChild(linha));
   salvar();
 }
 
