@@ -68,9 +68,9 @@
   const senha = "14162130";
   const tabela = document.querySelector("#tabela tbody");
 
-  // Função para adicionar nova linha (com senha)
+  // Função para adicionar nova pessoa (com senha)
   function adicionar() {
-    let senhaInput = prompt("Digite a senha para adicionar uma nova pessoa:");
+    const senhaInput = prompt("Digite a senha para adicionar uma nova pessoa:");
     if (senhaInput === senha) {
       const linha = document.createElement("tr");
       linha.innerHTML = `
@@ -93,9 +93,9 @@
 
   // Função para editar (habilita edição ou salva)
   function editar(botao) {
-    let linha = botao.parentElement.parentElement;
+    const linha = botao.parentElement.parentElement;
     if (botao.textContent === "Editar") {
-      let senhaInput = prompt("Digite a senha para editar esta pessoa:");
+      const senhaInput = prompt("Digite a senha para editar esta pessoa:");
       if (senhaInput === senha) {
         linha.querySelectorAll("td").forEach((td, idx) => {
           if (idx < 5) td.contentEditable = "true";
@@ -116,7 +116,7 @@
 
   // Função para excluir linha (com senha)
   function remover(botao) {
-    let senhaInput = prompt("Digite a senha para excluir esta pessoa:");
+    const senhaInput = prompt("Digite a senha para excluir esta pessoa:");
     if (senhaInput === senha) {
       botao.parentElement.parentElement.remove();
       salvar();
@@ -127,7 +127,7 @@
 
   // Salvar todos os dados no LocalStorage
   function salvar() {
-    let dados = [];
+    const dados = [];
     tabela.querySelectorAll("tr").forEach(linha => {
       const colunas = linha.querySelectorAll("td");
       dados.push({
@@ -138,12 +138,24 @@
         obs: colunas[4].innerText.trim()
       });
     });
-    localStorage.setItem("cadastro", JSON.stringify(dados));
+    try {
+      localStorage.setItem("cadastro", JSON.stringify(dados));
+    } catch (e) {
+      alert("Erro ao salvar os dados. Verifique o armazenamento do navegador.");
+      console.error(e);
+    }
   }
 
   // Carregar dados do LocalStorage
   function carregar() {
-    const dados = JSON.parse(localStorage.getItem("cadastro")) || [];
+    let dados;
+    try {
+      dados = JSON.parse(localStorage.getItem("cadastro"));
+    } catch (e) {
+      alert("Erro ao carregar os dados salvos.");
+      dados = [];
+    }
+    if (!Array.isArray(dados)) dados = [];
     tabela.innerHTML = "";
     dados.forEach(d => {
       const linha = document.createElement("tr");
@@ -166,8 +178,8 @@
   function ordenar() {
     const linhas = Array.from(tabela.querySelectorAll("tr"));
     linhas.sort((a, b) => {
-      let nomeA = a.children[0].innerText.toLowerCase();
-      let nomeB = b.children[0].innerText.toLowerCase();
+      const nomeA = a.children[0].innerText.toLowerCase();
+      const nomeB = b.children[0].innerText.toLowerCase();
       return nomeA.localeCompare(nomeB);
     });
     tabela.innerHTML = "";
@@ -177,7 +189,6 @@
 
   // Ao carregar a página, carregar os dados salvos
   carregar();
-
 </script>
 
 </body>
