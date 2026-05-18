@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Cadastro de Pessoas</title>
 
@@ -13,42 +14,12 @@ body{
   font-family:Arial;
   background:#f2f2f2;
   text-align:center;
+  margin:0;
+  padding:20px;
 }
 
-/* BOTÃO FLUTUANTE */
-
-#btnPDFGlobal{
-
-  position:fixed;
-
-  bottom:20px;
-  right:20px;
-
-  z-index:9999;
-
-  background:red;
-  color:white;
-
-  border:none;
-
-  padding:15px 20px;
-
-  border-radius:50px;
-
-  font-size:16px;
-
-  cursor:pointer;
-
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
-
-}
-
-#btnPDFGlobal:hover{
-
-  background:darkred;
-
-  transform:scale(1.05);
-
+h2{
+  color:#2196f3;
 }
 
 table{
@@ -106,14 +77,27 @@ td:focus{
   background:#fff8c4;
 }
 
+#usuario{
+  margin-top:10px;
+  font-weight:bold;
+  color:#333;
+}
+
 </style>
 
 </head>
 
 <body>
 
-
 <h2>Cadastro de Pessoas</h2>
+
+<button onclick="loginGoogle()">
+ Entrar com Google
+</button>
+
+<p id="usuario"></p>
+
+<br>
 
 <button onclick="adicionar()">
 Adicionar Pessoa
@@ -143,13 +127,91 @@ Ordenar por Nome
 
 </table>
 
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <script>
+
+/* SENHA */
 
 const senha = "14162130";
 
+/* TABELA */
+
 const tabela = document.querySelector("#tabela tbody");
 
+/* FIREBASE CONFIG */
+
+const firebaseConfig = {
+
+  apiKey: "SUA_API_KEY",
+
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+
+  projectId: "SEU_PROJETO",
+
+  storageBucket: "SEU_PROJETO.appspot.com",
+
+  messagingSenderId: "SEU_ID",
+
+  appId: "SEU_APP_ID"
+
+};
+
+/* INICIAR FIREBASE */
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+const db = firebase.firestore();
+
+let usuarioLogado = null;
+
+/* LOGIN GOOGLE */
+
+function loginGoogle(){
+
+  const provider =
+    new firebase.auth.GoogleAuthProvider();
+
+  auth.signInWithPopup(provider)
+
+  .then((result)=>{
+
+    usuarioLogado = result.user;
+
+    document.getElementById("usuario").innerText =
+
+      "Logado como: " + usuarioLogado.email;
+
+    carregar();
+
+  })
+
+  .catch((error)=>{
+
+    alert(error.message);
+
+  });
+}
+
+/* ADICIONAR */
+
 function adicionar(){
+
+  if(!usuarioLogado){
+
+    alert("Faça login primeiro!");
+
+    return;
+
+  }
 
   const s = prompt("Digite a senha para adicionar:");
 
@@ -193,6 +255,8 @@ function adicionar(){
   }
 }
 
+/* EDITAR */
+
 function editar(botao){
 
   const linha = botao.parentElement.parentElement;
@@ -235,6 +299,8 @@ function editar(botao){
   }
 }
 
+/* REMOVER */
+
 function remover(botao){
 
   const s = prompt("Digite a senha para excluir:");
@@ -256,7 +322,11 @@ function remover(botao){
   }
 }
 
-function salvar(){
+/* SALVAR FIRESTORE */
+
+async function salvar(){
+
+  if(!usuarioLogado) return;
 
   const dados = [];
 
@@ -279,53 +349,75 @@ function salvar(){
     }
   });
 
-  localStorage.setItem(
-    "cadastro",
-    JSON.stringify(dados)
-  );
-}
+  await db.collection("fichas")
 
-function carregar(){
+  .doc(usuarioLogado.uid)
 
-  const dados = JSON.parse(
-    localStorage.getItem("cadastro")
-  ) || [];
+  .set({
 
-  tabela.innerHTML = "";
-
-  dados.forEach(d=>{
-
-    const linha = document.createElement("tr");
-
-    linha.innerHTML = `
-      <td contenteditable="false">${d.nome}</td>
-      <td contenteditable="false">${d.telefone}</td>
-      <td contenteditable="false">${d.cpf}</td>
-      <td contenteditable="false">${d.rg}</td>
-      <td contenteditable="false">${d.obs}</td>
-      <td contenteditable="false">${d.tratamento}</td>
-
-      <td>
-
-        <button onclick="editar(this)">
-          Editar
-        </button>
-
-        <button class="pdf" onclick="gerarPDFPaciente(this)">
-          PDF
-        </button>
-
-        <button class="excluir" onclick="remover(this)">
-          Excluir
-        </button>
-
-      </td>
-    `;
-
-    tabela.appendChild(linha);
+    pacientes:dados
 
   });
 }
+
+/* CARREGAR FIRESTORE */
+
+async function carregar(){
+
+  if(!usuarioLogado) return;
+
+  const doc = await db
+
+  .collection("fichas")
+
+  .doc(usuarioLogado.uid)
+
+  .get();
+
+  tabela.innerHTML = "";
+
+  if(doc.exists){
+
+    const dados = doc.data().pacientes || [];
+
+    dados.forEach(d=>{
+
+      const linha = document.createElement("tr");
+
+      linha.innerHTML = `
+
+        <td contenteditable="false">${d.nome}</td>
+        <td contenteditable="false">${d.telefone}</td>
+        <td contenteditable="false">${d.cpf}</td>
+        <td contenteditable="false">${d.rg}</td>
+        <td contenteditable="false">${d.obs}</td>
+        <td contenteditable="false">${d.tratamento}</td>
+
+        <td>
+
+          <button onclick="editar(this)">
+            Editar
+          </button>
+
+          <button class="pdf"
+          onclick="gerarPDFPaciente(this)">
+            PDF
+          </button>
+
+          <button class="excluir"
+          onclick="remover(this)">
+            Excluir
+          </button>
+
+        </td>
+      `;
+
+      tabela.appendChild(linha);
+    });
+  }
+}
+
+/* ORDENAR */
 
 function ordenar(){
 
@@ -454,14 +546,11 @@ function gerarPDFPaciente(botao){
   janela.print();
 }
 
-carregar();
-
 </script>
 
 </body>
 
 </html>
-
 <!-- _______________________________________________¶¶_________
 _______¶______________________________________¶¶¶_________
 _______¶¶¶¶_________________________________¶¶¶¶¶_________

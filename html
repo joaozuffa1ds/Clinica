@@ -1,10 +1,78 @@
+/* SENHA */
+
 const senha = "14162130";
 
+/* TABELA */
+
 const tabela = document.querySelector("#tabela tbody");
+
+/* FIREBASE CONFIG */
+
+const firebaseConfig = {
+
+  apiKey: "SUA_API_KEY",
+
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+
+  projectId: "SEU_PROJETO",
+
+  storageBucket: "SEU_PROJETO.appspot.com",
+
+  messagingSenderId: "SEU_ID",
+
+  appId: "SEU_APP_ID"
+
+};
+
+/* INICIAR FIREBASE */
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+const db = firebase.firestore();
+
+let usuarioLogado = null;
+
+/* LOGIN GOOGLE */
+
+function loginGoogle(){
+
+  const provider =
+    new firebase.auth.GoogleAuthProvider();
+
+  auth.signInWithPopup(provider)
+
+  .then((result)=>{
+
+    usuarioLogado = result.user;
+
+    document.getElementById("usuario").innerText =
+
+      "Logado como: " + usuarioLogado.email;
+
+    carregar();
+
+  })
+
+  .catch((error)=>{
+
+    alert(error.message);
+
+  });
+}
 
 /* ADICIONAR */
 
 function adicionar(){
+
+  if(!usuarioLogado){
+
+    alert("Faça login primeiro!");
+
+    return;
+
+  }
 
   const s = prompt("Digite a senha para adicionar:");
 
@@ -26,11 +94,13 @@ function adicionar(){
           Salvar
         </button>
 
-        <button class="pdf" onclick="gerarPDFPaciente(this)">
+        <button class="pdf"
+        onclick="gerarPDFPaciente(this)">
           PDF
         </button>
 
-        <button class="excluir" onclick="remover(this)">
+        <button class="excluir"
+        onclick="remover(this)">
           Excluir
         </button>
 
@@ -115,9 +185,11 @@ function remover(botao){
   }
 }
 
-/* SALVAR */
+/* SALVAR FIRESTORE */
 
-function salvar(){
+async function salvar(){
+
+  if(!usuarioLogado) return;
 
   const dados = [];
 
@@ -140,54 +212,72 @@ function salvar(){
     }
   });
 
-  localStorage.setItem(
-    "cadastro",
-    JSON.stringify(dados)
-  );
+  await db.collection("fichas")
+
+  .doc(usuarioLogado.uid)
+
+  .set({
+
+    pacientes:dados
+
+  });
 }
 
-/* CARREGAR */
+/* CARREGAR FIRESTORE */
 
-function carregar(){
+async function carregar(){
 
-  const dados = JSON.parse(
-    localStorage.getItem("cadastro")
-  ) || [];
+  if(!usuarioLogado) return;
+
+  const doc = await db
+
+  .collection("fichas")
+
+  .doc(usuarioLogado.uid)
+
+  .get();
 
   tabela.innerHTML = "";
 
-  dados.forEach(d=>{
+  if(doc.exists){
 
-    const linha = document.createElement("tr");
+    const dados = doc.data().pacientes || [];
 
-    linha.innerHTML = `
-      <td contenteditable="false">${d.nome}</td>
-      <td contenteditable="false">${d.telefone}</td>
-      <td contenteditable="false">${d.cpf}</td>
-      <td contenteditable="false">${d.rg}</td>
-      <td contenteditable="false">${d.obs}</td>
-      <td contenteditable="false">${d.tratamento}</td>
+    dados.forEach(d=>{
 
-      <td>
+      const linha = document.createElement("tr");
 
-        <button onclick="editar(this)">
-          Editar
-        </button>
+      linha.innerHTML = `
 
-        <button class="pdf" onclick="gerarPDFPaciente(this)">
-          PDF
-        </button>
+        <td contenteditable="false">${d.nome}</td>
+        <td contenteditable="false">${d.telefone}</td>
+        <td contenteditable="false">${d.cpf}</td>
+        <td contenteditable="false">${d.rg}</td>
+        <td contenteditable="false">${d.obs}</td>
+        <td contenteditable="false">${d.tratamento}</td>
 
-        <button class="excluir" onclick="remover(this)">
-          Excluir
-        </button>
+        <td>
 
-      </td>
-    `;
+          <button onclick="editar(this)">
+            Editar
+          </button>
 
-    tabela.appendChild(linha);
+          <button class="pdf"
+          onclick="gerarPDFPaciente(this)">
+            PDF
+          </button>
 
-  });
+          <button class="excluir"
+          onclick="remover(this)">
+            Excluir
+          </button>
+
+        </td>
+      `;
+
+      tabela.appendChild(linha);
+    });
+  }
 }
 
 /* ORDENAR */
@@ -318,5 +408,3 @@ function gerarPDFPaciente(botao){
 
   janela.print();
 }
-
-carregar();
