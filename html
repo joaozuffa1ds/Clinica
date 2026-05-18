@@ -1,90 +1,322 @@
-<script>
 const senha = "14162130";
+
 const tabela = document.querySelector("#tabela tbody");
 
-function adicionar() {
+/* ADICIONAR */
+
+function adicionar(){
+
   const s = prompt("Digite a senha para adicionar:");
-  if (s===senha){
+
+  if(s===senha){
+
     const linha = document.createElement("tr");
+
     linha.innerHTML = `
       <td contenteditable="true"></td>
       <td contenteditable="true"></td>
       <td contenteditable="true"></td>
       <td contenteditable="true"></td>
       <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+
       <td>
-        <button onclick="editar(this)">Salvar</button>
-        <button class="excluir" onclick="remover(this)">Excluir</button>
+
+        <button onclick="editar(this)">
+          Salvar
+        </button>
+
+        <button class="pdf" onclick="gerarPDFPaciente(this)">
+          PDF
+        </button>
+
+        <button class="excluir" onclick="remover(this)">
+          Excluir
+        </button>
+
       </td>
     `;
+
     tabela.appendChild(linha);
+
     salvar();
-  } else alert("Senha incorreta!");
+
+  }else{
+
+    alert("Senha incorreta!");
+
+  }
 }
 
-function editar(botao) {
+/* EDITAR */
+
+function editar(botao){
+
   const linha = botao.parentElement.parentElement;
+
   if(botao.textContent==="Editar"){
+
     const s = prompt("Digite a senha para editar:");
+
     if(s===senha){
-      linha.querySelectorAll("td").forEach((td,i)=>{if(i<5) td.contentEditable="true";});
+
+      linha.querySelectorAll("td").forEach((td,i)=>{
+
+        if(i<6){
+          td.contentEditable="true";
+        }
+
+      });
+
       botao.textContent="Salvar";
-    } else alert("Senha incorreta!");
-  } else {
-    linha.querySelectorAll("td").forEach((td,i)=>{if(i<5) td.contentEditable="false";});
+
+    }else{
+
+      alert("Senha incorreta!");
+
+    }
+
+  }else{
+
+    linha.querySelectorAll("td").forEach((td,i)=>{
+
+      if(i<6){
+        td.contentEditable="false";
+      }
+
+    });
+
     botao.textContent="Editar";
+
     salvar();
   }
 }
 
+/* REMOVER */
+
 function remover(botao){
+
   const s = prompt("Digite a senha para excluir:");
-  if(s===senha){ botao.parentElement.parentElement.remove(); salvar(); }
-  else alert("Senha incorreta!");
+
+  if(s===senha){
+
+    if(confirm("Deseja realmente excluir?")){
+
+      botao.parentElement.parentElement.remove();
+
+      salvar();
+
+    }
+
+  }else{
+
+    alert("Senha incorreta!");
+
+  }
 }
+
+/* SALVAR */
 
 function salvar(){
+
   const dados = [];
+
   tabela.querySelectorAll("tr").forEach(linha=>{
+
     const col = linha.querySelectorAll("td");
-    dados.push({
-      nome: col[0].innerText.trim(),
-      telefone: col[1].innerText.trim(),
-      cpf: col[2].innerText.trim(),
-      rg: col[3].innerText.trim(),
-      obs: col[4].innerText.trim()
-    });
+
+    if(col.length >= 6){
+
+      dados.push({
+
+        nome: col[0].innerText.trim(),
+        telefone: col[1].innerText.trim(),
+        cpf: col[2].innerText.trim(),
+        rg: col[3].innerText.trim(),
+        obs: col[4].innerText.trim(),
+        tratamento: col[5].innerText.trim()
+
+      });
+    }
   });
-  localStorage.setItem("cadastro", JSON.stringify(dados));
+
+  localStorage.setItem(
+    "cadastro",
+    JSON.stringify(dados)
+  );
 }
 
+/* CARREGAR */
+
 function carregar(){
-  const dados = JSON.parse(localStorage.getItem("cadastro"))||[];
-  tabela.innerHTML="";
+
+  const dados = JSON.parse(
+    localStorage.getItem("cadastro")
+  ) || [];
+
+  tabela.innerHTML = "";
+
   dados.forEach(d=>{
-    const linha=document.createElement("tr");
-    linha.innerHTML=`
+
+    const linha = document.createElement("tr");
+
+    linha.innerHTML = `
       <td contenteditable="false">${d.nome}</td>
       <td contenteditable="false">${d.telefone}</td>
       <td contenteditable="false">${d.cpf}</td>
       <td contenteditable="false">${d.rg}</td>
       <td contenteditable="false">${d.obs}</td>
+      <td contenteditable="false">${d.tratamento}</td>
+
       <td>
-        <button onclick="editar(this)">Editar</button>
-        <button class="excluir" onclick="remover(this)">Excluir</button>
+
+        <button onclick="editar(this)">
+          Editar
+        </button>
+
+        <button class="pdf" onclick="gerarPDFPaciente(this)">
+          PDF
+        </button>
+
+        <button class="excluir" onclick="remover(this)">
+          Excluir
+        </button>
+
       </td>
     `;
+
     tabela.appendChild(linha);
+
   });
 }
 
+/* ORDENAR */
+
 function ordenar(){
-  const linhas=Array.from(tabela.querySelectorAll("tr"));
-  linhas.sort((a,b)=>a.children[0].innerText.toLowerCase().localeCompare(b.children[0].innerText.toLowerCase()));
+
+  const linhas = Array.from(
+    tabela.querySelectorAll("tr")
+  );
+
+  linhas.sort((a,b)=>
+
+    a.children[0].innerText
+    .toLowerCase()
+
+    .localeCompare(
+
+      b.children[0].innerText.toLowerCase()
+
+    )
+
+  );
+
   tabela.innerHTML="";
-  linhas.forEach(linha=>tabela.appendChild(linha));
+
+  linhas.forEach(linha=>
+    tabela.appendChild(linha)
+  );
+
   salvar();
 }
 
+/* PDF INDIVIDUAL */
+
+function gerarPDFPaciente(botao){
+
+  const linha = botao.parentElement.parentElement;
+
+  const col = linha.querySelectorAll("td");
+
+  const nome = col[0].innerText;
+  const telefone = col[1].innerText;
+  const cpf = col[2].innerText;
+  const rg = col[3].innerText;
+  const obs = col[4].innerText;
+  const tratamento = col[5].innerText;
+
+  const janela =
+    window.open('', '', 'width=800,height=700');
+
+  janela.document.write(`
+
+    <html>
+
+    <head>
+
+      <title>Ficha do Paciente</title>
+
+      <style>
+
+        body{
+          font-family:Arial;
+          padding:30px;
+          background:#f2f2f2;
+        }
+
+        .card{
+
+          background:white;
+
+          border-radius:10px;
+
+          padding:30px;
+
+          max-width:600px;
+
+          margin:auto;
+
+          box-shadow:0 0 10px rgba(0,0,0,0.2);
+
+        }
+
+        h1{
+          text-align:center;
+          color:#2196f3;
+        }
+
+        p{
+          font-size:18px;
+          margin:15px 0;
+        }
+
+        strong{
+          color:#1976d2;
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      <div class="card">
+
+        <h1>Ficha do Paciente</h1>
+
+        <p><strong>Nome:</strong> ${nome}</p>
+
+        <p><strong>Telefone:</strong> ${telefone}</p>
+
+        <p><strong>CPF:</strong> ${cpf}</p>
+
+        <p><strong>RG:</strong> ${rg}</p>
+
+        <p><strong>Observação:</strong> ${obs}</p>
+
+        <p><strong>Tratamento:</strong> ${tratamento}</p>
+
+      </div>
+
+    </body>
+
+    </html>
+
+  `);
+
+  janela.document.close();
+
+  janela.print();
+}
+
 carregar();
-</script>
