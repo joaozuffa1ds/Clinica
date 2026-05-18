@@ -42,7 +42,15 @@ let usuarioLogado = null;
 
 /* LOGIN GOOGLE */
 
+let carregandoLogin = false;
+
 function loginGoogle(){
+
+  if(carregandoLogin){
+    return;
+  }
+
+  carregandoLogin = true;
 
   const provider =
     new firebase.auth.GoogleAuthProvider();
@@ -63,65 +71,17 @@ function loginGoogle(){
 
   .catch((error)=>{
 
+    console.log(error);
+
     alert(error.message);
 
+  })
+
+  .finally(()=>{
+
+    carregandoLogin = false;
+
   });
-}
-
-/* ADICIONAR */
-
-function adicionar(){
-
-  if(!usuarioLogado){
-
-    alert("Faça login primeiro!");
-
-    return;
-
-  }
-
-  const s = prompt("Digite a senha para adicionar:");
-
-  if(s===senha){
-
-    const linha = document.createElement("tr");
-
-    linha.innerHTML = `
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-
-      <td>
-
-        <button onclick="editar(this)">
-          Salvar
-        </button>
-
-        <button class="pdf"
-        onclick="gerarPDFPaciente(this)">
-          PDF
-        </button>
-
-        <button class="excluir"
-        onclick="remover(this)">
-          Excluir
-        </button>
-
-      </td>
-    `;
-
-    tabela.appendChild(linha);
-
-    salvar();
-
-  }else{
-
-    alert("Senha incorreta!");
-
-  }
 }
 
 /* EDITAR */
